@@ -49,12 +49,33 @@ def add_gems
   gem 'whenever', require: false
 end
 
+def add_initial_commit
+  git :init
+  git add: "."
+  git commit: %Q{ -m 'Initial commit' }
+end
+
+def add_commit(message)
+  git add: "."
+  git commit: %Q{ -m '#{message}' }
+end
+
 def set_application_name
   # Add Application Name to Config
   environment "config.application_name = Rails.application.class.parent_name"
 
   # Announce the user where he can change the application name in the future.
   puts "You can change application name inside: ./config/application.rb"
+
+  add_commit('Set application name')
+end
+
+def update_database_config
+  insert_into_file "config/database.yml",
+  "  host:     <%= ENV.fetch('PG_HOST')     { 'localhost' } %>\n  username: <%= ENV.fetch('PG_USERNAME') { 'root' } %>\n  password: <%= ENV.fetch('PG_PASSWORD') { '' } %>\n",
+  after: "encoding: unicode\n"
+
+  add_commit('Update database config')
 end
 
 def add_users
@@ -224,7 +245,9 @@ add_template_repository_to_source_path
 add_gems
 
 after_bundle do
+  add_initial_commit
   set_application_name
+  update_database_config
   stop_spring
   add_users
   add_bootstrap
@@ -251,8 +274,5 @@ after_bundle do
 
   add_sitemap
 
-
-  git :init
-  git add: "."
-  git commit: %Q{ -m 'Initial commit' }
+  add_commit('after all changes from template')
 end
