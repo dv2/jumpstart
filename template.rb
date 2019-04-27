@@ -304,10 +304,6 @@ after_bundle do
   add_sitemap
 
   add_commit('after all changes from template')
-  # Commit everything to git
-  git :init
-  git add: "."
-  git commit: %Q{ -m 'Initial commit' }
 
   say
   say "Jumpstart app successfully created!", :blue
